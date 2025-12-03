@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Import des routes
+// Import routes
 import authRoutes from "./routes/authRoutes.js";
 import apiRoutes from "./routes/apiRoutes.js";
 import streamRoutes from "./routes/streamRoutes.js";
@@ -16,7 +16,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+
+// Render impose son propre port
+const PORT = process.env.PORT || 3000;
 
 /* -------------------------------------------------------
    SESSIONS
@@ -37,18 +39,12 @@ app.use(express.static(path.join(__dirname, "public")));
 /* -------------------------------------------------------
    ROUTES
 ------------------------------------------------------- */
-
-// Auth (login / callback Twitch)
 app.use("/", authRoutes);
-
-// API utilisateur (api/me)
 app.use("/api", apiRoutes);
-
-// Streams (api/stream/:name)
 app.use("/api", streamRoutes);
 
 /* -------------------------------------------------------
-   LOGOUT (corrigé)
+   LOGOUT
 ------------------------------------------------------- */
 app.get("/logout", (req, res) => {
     req.session.destroy(() => {
@@ -61,5 +57,5 @@ app.get("/logout", (req, res) => {
    SERVER START
 ------------------------------------------------------- */
 app.listen(PORT, () => {
-    console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
+    console.log(`🚀 Serveur lancé sur port ${PORT}`);
 });

@@ -13,12 +13,10 @@ let tokenExpires = 0;
 async function getAppToken() {
     const now = Date.now();
 
-    // Si token encore valide → on réutilise
     if (cachedToken && now < tokenExpires) {
         return cachedToken;
     }
 
-    // Sinon → on génère un nouveau token
     const res = await fetch("https://id.twitch.tv/oauth2/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -32,21 +30,21 @@ async function getAppToken() {
     const data = await res.json();
 
     cachedToken = data.access_token;
-    tokenExpires = now + data.expires_in * 1000; // expires_in = 3600 sec
+    tokenExpires = now + data.expires_in * 1000;
 
     return cachedToken;
 }
 
 /* -------------------------------------------------------
-   MINI-CACHE USER (pour éviter trop d'appels)
+   MINI-CACHE USER
 ------------------------------------------------------- */
 
-const userCache = new Map(); // key = login, value = { data, expires }
+const userCache = new Map();
 
 function cacheUser(login, data) {
     userCache.set(login, {
         data,
-        expires: Date.now() + 60 * 1000 // 60 sec
+        expires: Date.now() + 60 * 1000,
     });
 }
 
@@ -58,7 +56,7 @@ function getCachedUser(login) {
 }
 
 /* -------------------------------------------------------
-   ROUTE STREAM : /api/stream/:name
+   ROUTE STREAM
 ------------------------------------------------------- */
 
 router.get("/stream/:name", async (req, res) => {
@@ -68,7 +66,6 @@ router.get("/stream/:name", async (req, res) => {
         const token = await getAppToken();
 
         /* ----- USER INFO ----- */
-
         let user = getCachedUser(name);
 
         if (!user) {
@@ -77,19 +74,23 @@ router.get("/stream/:name", async (req, res) => {
                 {
                     headers: {
                         "Client-ID": process.env.TWITCH_CLIENT_ID,
-                        "Authorization": `Bearer ${token}`,
+                        Authorization: `Bearer ${token}`,
                     },
                 }
             );
 
             const json = await userRes.json();
+
+            // 🔥 SÉCURISATION
+            if (!json.data || json.data.length === 0) {
+                return res.json({
+                    error: "Utilisateur introuvable",
+                    live: false
+                });
+            }
+
             user = json.data[0];
-
-            if (user) cacheUser(name, user);
-        }
-
-        if (!user) {
-            return res.json({ error: "Utilisateur introuvable", live: false });
+            cacheUser(name, user);
         }
 
         /* ----- STREAM INFO ----- */
@@ -99,16 +100,19 @@ router.get("/stream/:name", async (req, res) => {
             {
                 headers: {
                     "Client-ID": process.env.TWITCH_CLIENT_ID,
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
             }
         );
 
         const streamJSON = await streamRes.json();
-        const live = streamJSON.data[0] || null;
 
-        /* ----- THUMBNAIL (1120x630) ----- */
+        // 🔥 SÉCURISATION
+        const live = (streamJSON.data && streamJSON.data.length > 0)
+            ? streamJSON.data[0]
+            : null;
 
+        /* ----- THUMBNAIL ----- */
         const thumbnail = live?.thumbnail_url
             ? live.thumbnail_url.replace("{width}", "1120").replace("{height}", "630")
             : null;
@@ -128,7 +132,7 @@ router.get("/stream/:name", async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Erreur API Twitch :", err);
+        console.error("Erreur API Twitch:", err);
         res.status(500).json({ error: "Erreur serveur Twitch" });
     }
 });
