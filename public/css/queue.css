@@ -1,0 +1,115 @@
+/* ------------------------------------
+   SIDEBAR GAUCHE
+------------------------------------ */
+.sidebar {
+    position: fixed;
+    top: 60px; /* sous la navbar */
+    left: 0;
+
+    width: 120px;
+    height: calc(100vh - 60px);
+
+    background: #0d1220;
+    border-right: 2px solid #1f2937;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+
+    padding: 20px 10px;
+}
+
+.queue-left-btn {
+    width: 100%;
+    padding: 10px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.queue-left-btn:hover {
+    background: #575bf8;
+    transform: scale(1.03);
+}
+
+.queue-avatars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.queue-avatar-item {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #9146ff;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.queue-avatar-item:hover {
+    transform: scale(1.1);
+}
+
+.queue-avatar-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ------------------------------------
+   ZONE LIVE
+------------------------------------ */
+.main-content {
+    margin-left: 150px;
+    padding: 30px;
+    text-align: center;
+    color: white;
+}
+
+.page-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.live-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Infos stream (titre, jeu, viewers) */
+.stream-info {
+    width: 1120px;
+    background: #111827;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: left;
+    border-left: 5px solid #9146ff;
+    font-size: 1rem;
+}
+
+/* Bouton sous le player */
+.add-bottom-btn {
+    margin-top: 10px;
+    padding: 10px 25px;
+    background: #6366f1;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.add-bottom-btn:hover {
+    background: #5356df;
+    transform: scale(1.05);
+}

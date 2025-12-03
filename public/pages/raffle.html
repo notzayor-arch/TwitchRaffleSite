@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Twitch Raffle</title>
+
+    <!-- Styles globaux -->
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/raffle.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR dynamique -->
+    <div id="navbar"></div>
+    <script src="/js/auth.js"></script>
+
+    <!-- Popup connexion Twitch -->
+    <div id="loginPopup" class="popup-overlay hidden">
+        <div class="popup-box">
+            <h2>Ravi de te voir 😎</h2>
+            <p>Connecte-toi pour utiliser les fonctionnalités</p>
+            <button class="popup-twitch-btn" onclick="loginWithTwitch()">Se connecter avec Twitch</button>
+            <a class="popup-close" onclick="closeLoginPopup()">Fermer</a>
+        </div>
+    </div>
+
+    <!-- CONTENU APPLICATION -->
+    <div class="app-container">
+
+        <header>
+            <h1>Twitch Raffle</h1>
+            <p>Participe gratuitement et gagne des tickets en regardant des pubs.</p>
+
+            <!-- Profil utilisateur si connecté -->
+            <div id="userPanel" class="user-panel" style="display:none;">
+                <img id="userAvatar" class="user-avatar">
+                <span id="userName" class="user-name"></span>
+            </div>
+        </header>
+
+        <main>
+
+            <!-- Statistiques -->
+            <section class="status-card">
+                <h2>Ton statut</h2>
+
+                <p><strong>Tickets totaux :</strong> <span id="totalTickets">0</span></p>
+                <p><strong>Tickets via pubs :</strong> <span id="adTickets">0</span></p>
+                <p><strong>Pubs regardées :</strong> <span id="adsWatched">0</span> / 
+                <span id="maxAds">5</span></p>
+            </section>
+
+            <!-- Actions -->
+            <section class="actions-card">
+                <h2>Actions</h2>
+
+                <button id="joinDrawBtn">Participer au tirage (1 ticket)</button>
+                <button id="watchAdBtn">Regarder une pub (+1 ticket)</button>
+                <button id="runDrawBtn">Lancer le tirage (test)</button>
+
+                <p id="message" class="message"></p>
+            </section>
+        </main>
+
+    </div>
+
+    <script>
+        // ---- Chargement informations utilisateur ----
+        let isLogged = false;
+
+        fetch("/api/me")
+            .then(res => res.json())
+            .then(data => {
+
+                isLogged = data.loggedIn;
+
+                if (data.loggedIn) {
+                    document.getElementById("userPanel").style.display = "flex";
+                    document.getElementById("userName").textContent = data.user.name;
+                    document.getElementById("userAvatar").src = data.user.avatar;
+                }
+            });
+
+        // ---- LOGIQUE DU RAFFLE ----
+        let totalTickets = 0;
+        let adTickets = 0;
+        let adsWatched = 0;
+        const maxAds = 5;
+
+        function requireLogin() {
+            if (!isLogged) {
+                openLoginPopup();
+                return false;
+            }
+            return true;
+        }
+
+        // Participer au tirage
+        document.getElementById("joinDrawBtn").addEventListener("click", () => {
+            if (!requireLogin()) return;
+
+            if (totalTickets <= 0) {
+                showMessage("Tu n'as pas assez de tickets !");
+                return;
+            }
+            totalTickets--;
+            showMessage("Participation enregistrée !");
+            updateUI();
+        });
+
+        // Regarder une pub
+        document.getElementById("watchAdBtn").addEventListener("click", () => {
+            if (!requireLogin()) return;
+
+            if (adsWatched >= maxAds) {
+                showMessage("Tu as atteint la limite de pubs !");
+                return;
+            }
+
+            adsWatched++;
+            adTickets++;
+            totalTickets++;
+
+            showMessage("Pub regardée ! +1 ticket");
+            updateUI();
+        });
+
+        // Test du tirage
+        document.getElementById("runDrawBtn").addEventListener("click", () => {
+            showMessage("Tirage lancé !");
+        });
+
+        // Mise à jour UI
+        function updateUI() {
+            document.getElementById("totalTickets").textContent = totalTickets;
+            document.getElementById("adTickets").textContent = adTickets;
+            document.getElementById("adsWatched").textContent = adsWatched;
+            document.getElementById("maxAds").textContent = maxAds;
+        }
+
+        function showMessage(msg) {
+            document.getElementById("message").textContent = msg;
+        }
+    </script>
+
+</body>
+</html>

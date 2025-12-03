@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Twitch Live Viewer</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/queue.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <div id="navbar"></div>
+    <script src="/js/auth.js"></script>
+
+    <!-- POPUP LOGIN -->
+    <div id="loginPopup" class="popup-overlay">
+        <div class="popup-box">
+            <h2>Ravi de te voir 😎</h2>
+
+            <button class="popup-twitch-btn" onclick="loginWithTwitch()">Se connecter avec Twitch</button>
+            <a class="popup-close" onclick="closeLoginPopup()">Fermer</a>
+        </div>
+    </div>
+
+    <!-- Colonne gauche -->
+    <div class="sidebar">
+        <button id="addToQueueBtn" class="queue-left-btn">S’ajouter à la file</button>
+
+        <div id="queueAvatars" class="queue-avatars"></div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="main-content">
+
+        <h1 class="page-title">Twitch Live Viewer</h1>
+
+        <div id="liveContainer" class="live-container">
+
+            <iframe id="twitchPlayer"
+                src=""
+                width="1120"
+                height="630"
+                frameborder="0"
+                allowfullscreen="true">
+            </iframe>
+
+            <div id="streamInfo" class="stream-info"></div>
+
+            <button id="addBtnBottom" class="add-bottom-btn">S’ajouter</button>
+
+        </div>
+
+    </div>
+
+    <script src="/js/queue.js" defer></script>
+
+</body>
+</html>
