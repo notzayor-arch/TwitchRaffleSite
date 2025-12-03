@@ -4,9 +4,13 @@ import fetch from "node-fetch";
 const router = express.Router();
 
 /* -------------------------------------------------------
+   CONFIG
+------------------------------------------------------- */
+const callbackURL = process.env.TWITCH_REDIRECT_URI; // 🔥 Centralisé
+
+/* -------------------------------------------------------
    LOGIN TWITCH
 ------------------------------------------------------- */
-
 router.get("/auth/twitch", (req, res) => {
 
     // Sauvegarde la page où l’utilisateur était
@@ -14,7 +18,7 @@ router.get("/auth/twitch", (req, res) => {
 
     const params = new URLSearchParams({
         client_id: process.env.TWITCH_CLIENT_ID,
-        redirect_uri: process.env.TWITCH_REDIRECT_URI,
+        redirect_uri: callbackURL,        // <─ Utilisation centralisée
         response_type: "code",
         scope: "user:read:email"
     });
@@ -23,7 +27,7 @@ router.get("/auth/twitch", (req, res) => {
 });
 
 /* -------------------------------------------------------
-   CALLBACK TWITCH (retour après login)
+   CALLBACK TWITCH
 ------------------------------------------------------- */
 router.get("/auth/twitch/callback", async (req, res) => {
     const code = req.query.code;
@@ -39,14 +43,14 @@ router.get("/auth/twitch/callback", async (req, res) => {
                 client_secret: process.env.TWITCH_CLIENT_SECRET,
                 code,
                 grant_type: "authorization_code",
-                redirect_uri: process.env.TWITCH_REDIRECT_URI
+                redirect_uri: callbackURL // <─ Utilisation centralisée
             })
         });
 
         const token = await tokenRes.json();
         if (!token.access_token) return res.send("Erreur : token invalide.");
 
-        // 2 — Infos utilisateur
+        // 2 — Récupérer les infos Twitch
         const userRes = await fetch("https://api.twitch.tv/helix/users", {
             headers: {
                 Authorization: `Bearer ${token.access_token}`,
@@ -57,7 +61,7 @@ router.get("/auth/twitch/callback", async (req, res) => {
         const data = await userRes.json();
         const u = data.data[0];
 
-        // 3 — Enregistrer la session utilisateur
+        // 3 — Enregistrer la session
         req.session.user = {
             id: u.id,
             login: u.login,
@@ -66,7 +70,7 @@ router.get("/auth/twitch/callback", async (req, res) => {
             email: u.email
         };
 
-        // 4 — Revenir automatiquement sur la page précédente
+        // 4 — Retour à la page précédente
         const redirectTo = req.session.returnTo || "/pages/queue.html";
         delete req.session.returnTo;
 
