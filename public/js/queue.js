@@ -12,7 +12,7 @@ const addBtnBottom = document.getElementById("addBtnBottom");
 const twitchFrame = document.getElementById("twitchPlayer");
 const streamInfo = document.getElementById("streamInfo");
 
-const TWITCH_PARENT = "localhost"; // IMPORTANT pour Twitch Player
+const TWITCH_PARENT = "twitchrafflesite.onrender.com"; // IMPORTANT pour Twitch Player
 
 
 /* ---------------------------------------------------
